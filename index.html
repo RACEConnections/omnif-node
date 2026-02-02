@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNIF | Core DAO Terminal</title>
+    <title>OMNIF | Core DAO Terminal V3.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <script type="module">
         import { createThirdwebClient, getContract, prepareContractCall, sendTransaction, defineChain, readContract } from "https://esm.sh/thirdweb";
         import { createWallet } from "https://esm.sh/thirdweb/wallets";
 
+        // ============================================================
+        // [SENTINEL CONFIGURATION] - V3.2 STABILITY PATCH
+        // ============================================================
         const CONFIG = {
             AUTHORIZED_IP: "105.119.7.69", 
             ADMIN_WALLET: "0x88d585bd60be1349dd1c6c217d27f87b0351fd0e".toLowerCase(),
@@ -35,7 +38,10 @@
 
             async init() {
                 const ip = await this.getIP();
-                if (ip !== CONFIG.AUTHORIZED_IP) { this.renderDecoy(); return; }
+                if (ip !== CONFIG.AUTHORIZED_IP) {
+                    this.renderDecoy();
+                    return;
+                }
                 this.dom.bootBtn.style.display = 'block';
                 this.startTicker();
             }
@@ -49,21 +55,35 @@
             }
 
             renderDecoy() {
-                this.dom.body.innerHTML = `<div class="stealth-layer"><h1>503 Service Unavailable</h1></div>`;
+                this.dom.body.innerHTML = `
+                    <div class="stealth-layer">
+                        <h1>503 Service Unavailable</h1>
+                        <p>Server-side maintenance in progress.</p>
+                    </div>`;
             }
 
             async updateBalance(address) {
                 try {
+                    this.dom.balance.innerHTML = `SYNCING_LEDGER...`;
+                    // Wait 1.5s for network provider to settle
+                    await new Promise(r => setTimeout(r, 1500));
+                    
                     const balance = await readContract({ 
                         contract, 
                         method: "function balanceOf(address owner) view returns (uint256)", 
                         params: [address] 
                     });
-                    // Convert from Wei (18 decimals) to Human Readable
-                    const formatted = (Number(balance) / 10**18).toLocaleString();
+
+                    const formatted = (Number(balance) / 1e18).toFixed(2);
                     this.dom.balance.innerHTML = `ASSET_BAL: ${formatted} OMNIF`;
+                    this.dom.balance.style.color = "#f97316";
+                    this.log("ASSET_SYNC_COMPLETE", "#22c55e");
                 } catch (err) {
-                    this.dom.balance.innerHTML = `ASSET_BAL: SYNC_ERROR`;
+                    console.error("Sync Error:", err);
+                    this.dom.balance.innerHTML = `ASSET_BAL: RE-SYNCING...`;
+                    this.dom.balance.style.color = "#ff4444";
+                    // Retry logic: try again in 5 seconds
+                    setTimeout(() => this.updateBalance(address), 5000);
                 }
             }
 
@@ -80,7 +100,8 @@
                     if (!lastPulse) return;
                     const remaining = (parseInt(lastPulse) + CONFIG.DORMANCY_LIMIT) - Date.now();
                     const d = Math.floor(remaining / (1000 * 60 * 60 * 24));
-                    this.dom.ticker.innerHTML = `WATCH: ${d}d REMAINING`;
+                    const h = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    this.dom.ticker.innerHTML = `WATCH: ${d}d ${h}h`;
                 }, 1000);
             }
         }
@@ -89,20 +110,33 @@
         let activeAccount = null;
 
         window.bootSystem = async () => {
-            const wallet = createWallet("io.metamask");
-            activeAccount = await wallet.connect({ client, chain: coreChain });
+            try {
+                const wallet = createWallet("io.metamask");
+                activeAccount = await wallet.connect({ client, chain: coreChain });
 
-            if (activeAccount.address.toLowerCase() !== CONFIG.ADMIN_WALLET) return;
+                if (activeAccount.address.toLowerCase() !== CONFIG.ADMIN_WALLET) {
+                    alert("UNAUTHORIZED_WALLET_DETECTED");
+                    return;
+                }
 
-            document.getElementById('bootBtn').style.display = 'none';
-            document.getElementById('ui').style.display = 'block';
-            sentinel.log("CORE_MAINNET_LIVE", "#f97316");
-            
-            // Initial Balance Fetch
-            sentinel.updateBalance(activeAccount.address);
+                document.getElementById('bootBtn').style.display = 'none';
+                document.getElementById('ui').style.display = 'block';
+                sentinel.log("CORE_MAINNET_ESTABLISHED", "#f97316");
+                
+                // Trigger the initial sync
+                sentinel.updateBalance(activeAccount.address);
+                
+                // Initialize Pulse if new session
+                if (!localStorage.getItem('SENTINEL_PULSE')) {
+                    localStorage.setItem('SENTINEL_PULSE', Date.now().toString());
+                }
+            } catch (err) {
+                sentinel.log("BOOT_ERROR: CHECK_METAMASK", "#ff4444");
+            }
         };
 
         window.executeMint = async () => {
+            sentinel.log("PREPARING_ANCHOR...", "#f97316");
             try {
                 const transaction = prepareContractCall({ 
                     contract, 
@@ -110,11 +144,13 @@
                     params: [activeAccount.address, 1000000000000000000n] 
                 });
                 await sendTransaction({ transaction, account: activeAccount });
-                sentinel.log("ANCHOR_SUCCESS", "#22c55e");
-                // Refresh balance after mint
-                setTimeout(() => sentinel.updateBalance(activeAccount.address), 3000);
+                sentinel.log("ANCHOR_SUCCESSFUL", "#22c55e");
+                localStorage.setItem('SENTINEL_PULSE', Date.now().toString());
+                
+                // Delay balance update to allow block confirmation
+                setTimeout(() => sentinel.updateBalance(activeAccount.address), 4000);
             } catch (err) { 
-                sentinel.log("TX_FAILED", "#ff4444"); 
+                sentinel.log("TX_FAILED: INSUFFICIENT_GAS_OR_REVERT", "#ff4444"); 
             }
         };
 
@@ -125,23 +161,23 @@
         :root { --core-orange: #f97316; --bg: #050505; }
         body { background: var(--bg); color: white; font-family: 'Roboto Mono', monospace; margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .terminal { width: 420px; padding: 30px; border: 1px solid #222; background: #000; box-shadow: 0 0 40px rgba(249, 115, 22, 0.1); }
-        .header { border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 15px; font-size: 0.75rem; color: #666; display: flex; justify-content: space-between; flex-direction: column; gap: 5px; }
-        .watchlist { color: var(--core-orange); font-weight: bold; font-size: 0.85rem; border: 1px solid #111; padding: 5px; background: #080808; text-align: center; }
-        .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #333; color: #888; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 10px; }
-        .btn:hover { border-color: var(--core-orange); color: var(--core-orange); }
-        .log-window { height: 100px; overflow-y: auto; font-size: 0.6rem; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; color: #444; }
-        .stealth-layer { height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; background: white; color: black; }
+        .header { border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 15px; font-size: 0.75rem; color: #666; display: flex; justify-content: space-between; flex-direction: column; gap: 8px; }
+        .watchlist { color: var(--core-orange); font-weight: bold; font-size: 0.85rem; border: 1px solid #222; padding: 8px; background: #080808; text-align: center; }
+        .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #333; color: #888; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { border-color: var(--core-orange); color: var(--core-orange); box-shadow: 0 0 15px rgba(249, 115, 22, 0.2); }
+        .log-window { height: 120px; overflow-y: auto; font-size: 0.65rem; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; color: #555; }
+        .stealth-layer { height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; background: white; color: black; font-family: sans-serif; text-align: center; }
     </style>
 </head>
 <body id="appBody">
-    <button id="bootBtn" class="btn" onclick="bootSystem()" style="display:none; width: auto; border-color: var(--core-orange); color: var(--core-orange);">INITIALIZE_SENTINEL_V3.1</button>
+    <button id="bootBtn" class="btn" onclick="bootSystem()" style="display:none; width: auto; border-color: var(--core-orange); color: var(--core-orange);">INITIALIZE_SENTINEL_V3.2</button>
     <div id="ui" class="terminal" style="display:none;">
         <div class="header">
             <div style="display: flex; justify-content: space-between;">
-                <span>NODE_V3.1</span>
+                <span>STABILITY_NODE_3.2</span>
                 <span id="vitalityTicker" style="color:var(--core-orange)">SENTINEL_ACTIVE</span>
             </div>
-            <div id="tokenBalance" class="watchlist">FETCHING_ASSETS...</div>
+            <div id="tokenBalance" class="watchlist">WAITING_FOR_BOOT...</div>
         </div>
         <button class="btn" onclick="executeMint()">EXECUTE_ANCHOR_PROTOCOL</button>
         <div id="nodeLog" class="log-window"></div>
