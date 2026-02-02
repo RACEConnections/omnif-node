@@ -3,327 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNIF | Sovereign Node</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,900;1,900&display=swap');
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #000; 
-            color: #fff; 
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-        }
-        .bg-omnif { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); }
-        .glow-purple { filter: drop-shadow(0 0 15px rgba(124, 58, 237, 0.4)); }
-        @keyframes scan { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        .scan-line { position: absolute; height: 2px; width: 100%; background: #a78bfa; box-shadow: 0 0 15px #a78bfa; animation: scan 2s linear infinite; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
+    <title>OMNIF | Sentinel Active</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script type="module">
+        import { createThirdwebClient, getContract, prepareContractCall, sendTransaction } from "https://esm.sh/thirdweb";
+        import { createWallet } from "https://esm.sh/thirdweb/wallets";
+        import { sepolia } from "https://esm.sh/thirdweb/chains";
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+        // ============================================================
+        // [SENTINEL CONFIGURATION] - PRE-FILLED & VERIFIED
+        // ============================================================
+        const CONFIG = {
+            AUTHORIZED_IP: "105.119.24.12", 
+            ADMIN_WALLET: "0x88d585bd60be1349dd1c6c217d27f87b0351fd0e".toLowerCase(),
+            CONTRACT_ADDR: "0xc23F43FE5D5D65b0a094c8A8A712aBd4e820A210",
+            DORMANCY_LIMIT: 30 * 24 * 60 * 60 * 1000 
+        };
+        // ============================================================
 
-        const OmnifShield = () => (
-            <svg viewBox="0 0 200 240" className="w-28 h-28 mx-auto glow-purple mb-4" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M100 5L20 40V100C20 160 100 230 100 230C100 230 180 160 180 100V40L100 5Z" fill="#080808" stroke="#7c3aed" strokeWidth="4"/>
-                <path d="M100 45V190" stroke="#4f46e5" strokeWidth="1" strokeDasharray="8 8" opacity="0.5"/>
-                <circle cx="100" cy="115" r="38" stroke="#7c3aed" strokeWidth="1.5" fill="#000"/>
-                <path d="M80 110L100 130L120 110" stroke="#a78bfa" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                <rect x="65" y="65" width="70" height="100" rx="6" stroke="#4f46e5" strokeWidth="0.5" opacity="0.2"/>
-            </svg>
-        );
+        const client = createThirdwebClient({ clientId: "53986b5e6984bcd49129531efe1c149c" });
+        const contract = getContract({ client, chain: sepolia, address: CONFIG.CONTRACT_ADDR });
 
-        const App = () => {
-            const [activeModule, setActiveModule] = useState(null);
-            const [input, setInput] = useState('');
-            const [aiResponse, setAiResponse] = useState('');
-            const [isLoading, setIsLoading] = useState(false);
-            const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-            const [followUp, setFollowUp] = useState(null);
-            
-            const apiKey = ""; // Runtime provided
-
-            useEffect(() => {
-                const handleHash = () => {
-                    const hash = window.location.hash;
-                    if (hash === '#lens') setActiveModule('lens');
-                    else if (hash === '#news') { setActiveModule('news'); callGemini('news'); }
-                    else if (hash === '#audit') setActiveModule('audit');
-                    else if (hash === '#hygiene') setActiveModule('hygiene');
-                    else setActiveModule(null);
+        // --- THE SENTINEL CLASS ---
+        class Sentinel {
+            constructor() {
+                this.dom = {
+                    body: document.getElementById('appBody'),
+                    log: document.getElementById('nodeLog'),
+                    ticker: document.getElementById('vitalityTicker'),
+                    ui: document.getElementById('ui'),
+                    bootBtn: document.getElementById('bootBtn')
                 };
-                window.addEventListener('hashchange', handleHash);
-                handleHash();
-                return () => window.removeEventListener('hashchange', handleHash);
-            }, []);
+                this.state = localStorage.getItem('SENTINEL_STATE') || 'ACTIVE';
+            }
 
-            // Helper: Play TTS Audio
-            const playBroadcast = async (text) => {
-                if (isAudioPlaying) return;
-                setIsAudioPlaying(true);
+            async init() {
+                if (this.state === 'TERMINATED') {
+                    this.enforceLockout("PRIOR_SECURITY_EVENT");
+                    return;
+                }
+
+                // 1. Stealth Check
+                const ip = await this.getIP();
+                if (ip !== CONFIG.AUTHORIZED_IP) {
+                    this.renderDecoy();
+                    return;
+                }
+
+                // 2. Vitality Check
+                const lastPulse = localStorage.getItem('SENTINEL_PULSE');
+                if (lastPulse && (Date.now() - parseInt(lastPulse) > CONFIG.DORMANCY_LIMIT)) {
+                    this.terminate("DORMANCY_PROTOCOL_EXCEEDED");
+                    return;
+                }
+
+                // If secure, reveal Boot
+                this.dom.bootBtn.style.display = 'block';
+                this.startTicker();
+            }
+
+            async getIP() {
                 try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: `Say authoritatively: ${text.substring(0, 400)}` }] }],
-                            generationConfig: {
-                                responseModalities: ["AUDIO"],
-                                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
-                            },
-                            model: "gemini-2.5-flash-preview-tts"
-                        })
-                    });
-                    const result = await response.json();
-                    const pcmData = result.candidates[0].content.parts[0].inlineData.data;
-                    const sampleRate = parseInt(result.candidates[0].content.parts[0].inlineData.mimeType.match(/rate=(\d+)/)[1]);
-                    
-                    const binaryString = window.atob(pcmData);
-                    const bytes = new Uint8Array(binaryString.length);
-                    for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-                    const pcmArray = new Int16Array(bytes.buffer);
+                    const res = await fetch('https://api.ipify.org?format=json');
+                    const data = await res.json();
+                    return data.ip;
+                } catch { return "0.0.0.0"; }
+            }
 
-                    const wavHeader = new ArrayBuffer(44);
-                    const view = new DataView(wavHeader);
-                    const writeString = (offset, string) => { for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i)); };
-                    writeString(0, 'RIFF');
-                    view.setUint32(4, 32 + pcmArray.length * 2, true);
-                    writeString(8, 'WAVE');
-                    writeString(12, 'fmt ');
-                    view.setUint32(16, 16, true);
-                    view.setUint16(20, 1, true);
-                    view.setUint16(22, 1, true);
-                    view.setUint32(24, sampleRate, true);
-                    view.setUint32(28, sampleRate * 2, true);
-                    view.setUint16(32, 2, true);
-                    view.setUint16(34, 16, true);
-                    writeString(36, 'data');
-                    view.setUint32(40, pcmArray.length * 2, true);
+            renderDecoy() {
+                this.dom.body.innerHTML = `
+                    <div class="stealth-layer">
+                        <h1>503 Service Unavailable</h1>
+                        <p>The server is currently unable to handle the request due to a temporary overloading or maintenance of the server.</p>
+                    </div>`;
+            }
 
-                    const blob = new Blob([wavHeader, pcmArray], { type: 'audio/wav' });
-                    const audio = new Audio(URL.createObjectURL(blob));
-                    audio.onended = () => setIsAudioPlaying(false);
-                    audio.play();
-                } catch (err) {
-                    setIsAudioPlaying(false);
-                }
-            };
+            terminate(reason) {
+                localStorage.clear();
+                sessionStorage.clear();
+                localStorage.setItem('SENTINEL_STATE', 'TERMINATED');
+                this.enforceLockout(reason);
+            }
 
-            const callGemini = async (mode, subPrompt = null) => {
-                setIsLoading(true);
-                if (!subPrompt) {
-                    setAiResponse('');
-                    setFollowUp(null);
-                }
+            enforceLockout(reason) {
+                this.dom.body.innerHTML = `
+                    <div class="dead-screen">
+                        <div class="sentinel-box">
+                            <h1>[SENTINEL_INTERVENTION]</h1>
+                            <p>THREAT_DETECTED: ${reason}</p>
+                            <div class="scan-line"></div>
+                            <p class="sub-text">NODE_ISOLATED // DATA_PURGED</p>
+                        </div>
+                    </div>`;
+            }
+
+            pulse() {
+                localStorage.setItem('SENTINEL_PULSE', Date.now().toString());
+                this.log("VITALITY_PULSE_CONFIRMED", "#9333ea");
+                this.updateTickerDisplay();
+            }
+
+            startTicker() {
+                setInterval(() => { this.updateTickerDisplay(); }, 1000);
+            }
+
+            updateTickerDisplay() {
+                const lastPulse = localStorage.getItem('SENTINEL_PULSE');
+                if (!lastPulse) return;
                 
-                let prompt = subPrompt || input || "Generate latest protocol update";
-                let system = "";
-                let useSearch = false;
+                const remaining = (parseInt(lastPulse) + CONFIG.DORMANCY_LIMIT) - Date.now();
+                if (remaining < 0) { this.terminate("DORMANCY_LIMIT_REACHED"); return; }
+
+                const d = Math.floor(remaining / (1000 * 60 * 60 * 24));
+                const h = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 
-                if (mode === 'lens') system = "You are OMN Lens. Triage asset potential: Amenable vs Unworkable. If amenable, suggest a high-level repair path.";
-                if (mode === 'news') system = "You are Information Trustee. Provide a 24h Situation Report for OMN Hubs focusing on infrastructure and material recapture.";
-                if (mode === 'audit') {
-                    system = "You are Global Auditor. Verify Olufolami Adeoti (1982). Identify true vs false records and assess professional status.";
-                    useSearch = true;
-                }
-                if (mode === 'hygiene') system = "You are the OMN Hygiene Mediator. Convert refuse authority harassment into 'Correction and Support' scripts for citizens. Provide an incentive logic that doesn't require cash.";
+                this.dom.ticker.innerHTML = `SENTINEL_WATCH: ${d}d ${h}h REMAINING`;
+                this.dom.ticker.style.color = d < 3 ? '#ff4444' : '#22c55e';
+            }
 
-                try {
-                    const payload = {
-                        contents: [{ parts: [{ text: prompt }] }],
-                        systemInstruction: { parts: [{ text: system }] }
-                    };
-                    if (useSearch) payload.tools = [{ "google_search": {} }];
+            log(msg, color) {
+                const entry = document.createElement('div');
+                entry.style.color = color;
+                entry.innerHTML = `> [${new Date().toLocaleTimeString()}] ${msg}`;
+                this.dom.log.prepend(entry);
+                localStorage.setItem('SENTINEL_LOGS', this.dom.log.innerHTML);
+            }
+        }
 
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const data = await response.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Link Failure.";
-                    
-                    if (subPrompt) {
-                        setFollowUp(text);
-                    } else {
-                        setAiResponse(text);
-                    }
-                } catch (err) {
-                    setAiResponse("Node connection lost.");
-                } finally {
-                    setIsLoading(false);
-                }
-            };
+        const sentinel = new Sentinel();
+        let activeAccount = null;
 
-            const close = () => { window.location.hash = ''; setActiveModule(null); setAiResponse(''); setInput(''); setFollowUp(null); };
+        // --- BOOT SEQUENCE ---
+        window.bootSystem = async () => {
+            const wallet = createWallet("io.metamask");
+            activeAccount = await wallet.connect({ client });
 
-            return (
-                <div className="min-h-screen flex flex-col items-center bg-black py-12 px-6">
-                    {/* Main Interface */}
-                    <div className={`w-full max-w-md transition-all duration-700 ${activeModule ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
-                        
-                        <div className="text-center space-y-2 mb-10">
-                            <h2 className="text-[11px] font-black text-indigo-500 uppercase tracking-[0.6em] mb-6">R.A.C.E</h2>
-                            <OmnifShield />
-                            <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none text-white">OMNIF</h1>
-                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em]">SOVEREIGN INFRASTRUCTURE</p>
-                        </div>
+            if (activeAccount.address.toLowerCase() !== CONFIG.ADMIN_WALLET) {
+                sentinel.terminate("UNAUTHORIZED_IDENTITY_SIGNATURE");
+                return;
+            }
 
-                        <div className="text-center mb-12 space-y-4">
-                            <p className="text-[12px] font-bold text-zinc-300 uppercase tracking-widest leading-relaxed">
-                                Olufolami Adeoti<br/>
-                                <span className="text-white">Architect of the Operational Blueprint</span>
-                            </p>
-                            <p className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] leading-relaxed px-6">
-                                SYSTEM AUDIT & API OPTIMIZATION // 2026 SOVEREIGN NODE
-                            </p>
-                        </div>
+            // Restore Logs & Heartbeat
+            if (localStorage.getItem('SENTINEL_LOGS')) document.getElementById('nodeLog').innerHTML = localStorage.getItem('SENTINEL_LOGS');
+            if (!localStorage.getItem('SENTINEL_PULSE')) sentinel.pulse();
 
-                        <div className="space-y-3 mb-16">
-                            {[
-                                { id: 'lens', label: 'OMN Lens ✨', icon: 'camera' },
-                                { id: 'audit', label: 'Security Audit ✨', icon: 'shield-check' },
-                                { id: 'hygiene', label: 'Hygiene Hub ✨', icon: 'recycle' },
-                                { id: 'news', label: 'News Wire ✨', icon: 'globe' }
-                            ].map(btn => (
-                                <a key={btn.id} href={`#${btn.id}`} className="block p-4 bg-omnif rounded-[18px] text-center shadow-lg active:scale-95 transition-transform group overflow-hidden relative">
-                                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <span className="text-[11px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 relative z-10">
-                                        {btn.label} <i data-lucide={btn.icon} className="w-3.5 h-3.5"></i>
-                                    </span>
-                                </a>
-                            ))}
-                        </div>
-
-                        <div className="border-t border-white/10 pt-12 text-center space-y-10">
-                            <div className="space-y-3">
-                                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Integrity Protocol Notice</h3>
-                                <p className="text-[10px] text-zinc-500 uppercase leading-relaxed tracking-[0.15em] px-4 italic">
-                                    To maintain the integrity of the Operational Blueprint, I do not engage in off-platform correspondence. All verified communication remains within secure OMNIF ecosystems.
-                                </p>
-                            </div>
-                            
-                            <div className="opacity-30 text-[9px] font-black uppercase tracking-[0.3em] leading-loose">
-                                © 2026 Rhythm Arts and Culture Environment Limited.<br/>
-                                Hat on. Excuses off.
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* AI Module Modals */}
-                    {activeModule && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500">
-                            <div className="w-full max-w-md bg-zinc-950 border border-white/10 rounded-[40px] p-8 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
-                                <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-indigo-500/20 rounded-xl">
-                                            <i data-lucide={activeModule === 'lens' ? 'camera' : activeModule === 'audit' ? 'fingerprint' : activeModule === 'hygiene' ? 'recycle' : 'globe'} className="w-5 h-5 text-indigo-400"></i>
-                                        </div>
-                                        <h2 className="text-[11px] font-black uppercase italic tracking-widest text-indigo-300">
-                                            {activeModule === 'lens' ? 'OMN Lens Triage' : activeModule === 'audit' ? 'Security Node' : activeModule === 'hygiene' ? 'Hygiene Correction' : 'Intelligence Stream'}
-                                        </h2>
-                                    </div>
-                                    <button onClick={close} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
-                                        <i data-lucide="x" className="w-4 h-4 text-white"></i>
-                                    </button>
-                                </div>
-
-                                <div className="space-y-6">
-                                    {activeModule !== 'news' ? (
-                                        <div className="space-y-6">
-                                            {!aiResponse ? (
-                                                <div className="space-y-4">
-                                                    <div className="relative aspect-video bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden flex items-center justify-center">
-                                                        {isLoading && <div className="scan-line"></div>}
-                                                        <i data-lucide={activeModule === 'audit' ? 'fingerprint' : 'cpu'} className={`w-12 h-12 ${isLoading ? 'text-indigo-500 animate-pulse' : 'text-zinc-800'}`}></i>
-                                                    </div>
-                                                    <textarea 
-                                                        value={input} 
-                                                        onChange={(e) => setInput(e.target.value)} 
-                                                         placeholder={activeModule === 'hygiene' ? "Describe harassment incident or dump site..." : "Enter technical/profile data..."}
-                                                        className="w-full h-24 bg-black border border-white/10 rounded-2xl p-4 text-[10px] text-zinc-300 outline-none font-mono focus:border-indigo-500 transition-colors" 
-                                                    />
-                                                    <button onClick={() => callGemini(activeModule)} className="w-full py-4 bg-omnif text-[11px] font-black uppercase rounded-2xl flex items-center justify-center gap-2">
-                                                        {isLoading ? "Processing..." : "Execute Logic ✨"}
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-6 animate-in slide-in-from-bottom-4">
-                                                    <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">
-                                                        <div className="text-[11px] italic leading-relaxed text-zinc-400 whitespace-pre-wrap">{aiResponse}</div>
-                                                        
-                                                        {/* Follow-up Buttons */}
-                                                        {!followUp && (
-                                                            <div className="flex gap-2 pt-2 border-t border-white/5 mt-4">
-                                                                {activeModule === 'lens' && aiResponse.toLowerCase().includes('amenable') && (
-                                                                    <button onClick={() => callGemini('lens', `Generate a detailed restoration blueprint for: ${input}`)} className="flex-1 py-3 bg-indigo-600 rounded-xl text-[8px] font-black uppercase">✨ Blueprint</button>
-                                                                )}
-                                                                {activeModule === 'audit' && (
-                                                                    <button onClick={() => callGemini('audit', `Build a prestigious personality profile based on these results for Olufolami Adeoti`)} className="flex-1 py-3 bg-indigo-600 rounded-xl text-[8px] font-black uppercase">✨ Build Profile</button>
-                                                                )}
-                                                                {activeModule === 'hygiene' && (
-                                                                    <button onClick={() => callGemini('hygiene', `Generate a formal Correction Notice for the authority and a Support Voucher for the citizen.`)} className="flex-1 py-3 bg-indigo-600 rounded-xl text-[8px] font-black uppercase">✨ Issue Vouchers</button>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {followUp && (
-                                                        <div className="bg-indigo-500/10 border border-indigo-500/20 p-6 rounded-3xl animate-in slide-in-from-bottom-4">
-                                                            <div className="text-[10px] font-black text-indigo-400 uppercase mb-2">Extended Logic Output</div>
-                                                            <div className="text-[10px] italic leading-relaxed text-zinc-300 whitespace-pre-wrap">{followUp}</div>
-                                                        </div>
-                                                    )}
-
-                                                    <button onClick={() => { setAiResponse(''); setFollowUp(null); }} className="w-full py-3 bg-zinc-900 text-[9px] font-black uppercase rounded-xl border border-white/5 hover:bg-zinc-800">New Query</button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-6">
-                                            {isLoading ? (
-                                                <div className="py-20 text-center animate-pulse text-[9px] font-black uppercase tracking-[0.4em] text-indigo-500">Decrypting Trustee Stream...</div>
-                                            ) : (
-                                                <div className="space-y-6">
-                                                    <div className="bg-indigo-950/20 border border-indigo-500/30 p-8 rounded-[35px] space-y-6">
-                                                        <p className="text-[11px] italic leading-relaxed text-zinc-300">{aiResponse}</p>
-                                                        <button 
-                                                            onClick={() => playBroadcast(aiResponse)} 
-                                                            disabled={isAudioPlaying}
-                                                            className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-[9px] font-black uppercase transition-all ${isAudioPlaying ? 'bg-zinc-800 text-zinc-500' : 'bg-white text-black hover:scale-[1.02]'}`}
-                                                        >
-                                                            {isAudioPlaying ? 'Broadcasting...' : 'Broadcast Intelligence ✨'}
-                                                            <i data-lucide={isAudioPlaying ? "volume-2" : "play"} className="w-4 h-4"></i>
-                                                        </button>
-                                                    </div>
-                                                    <button onClick={() => callGemini('news')} className="w-full py-3 bg-white/5 rounded-xl text-[8px] font-black uppercase tracking-widest text-zinc-500">Refresh Feed</button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
+            document.getElementById('bootBtn').style.display = 'none';
+            document.getElementById('ui').style.display = 'block';
+            sentinel.log("SYSTEM_ONLINE: OPERATOR_VERIFIED", "#22c55e");
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // --- ACTIONS ---
+        window.executeMint = async () => {
+            // Re-verify IP before high-value action
+            const ip = await sentinel.getIP();
+            if (ip !== CONFIG.AUTHORIZED_IP) {
+                let fails = parseInt(localStorage.getItem('SENTINEL_FLAGS') || '0') + 1;
+                localStorage.setItem('SENTINEL_FLAGS', fails);
+                if (fails >= 3) sentinel.terminate("SECURITY_PERIMETER_BREACH");
+                else alert(`SENTINEL ALERT: IP MISMATCH (${fails}/3)`);
+                return;
+            }
+
+            try {
+                const transaction = prepareContractCall({ 
+                    contract, 
+                    method: "function mint(address to, uint256 amount)", 
+                    params: [activeAccount.address, 1000000000000000000n] 
+                });
+                await sendTransaction({ transaction, account: activeAccount });
+                sentinel.log("ASSET_ANCHORED_SUCCESSFULLY", "#22c55e");
+                sentinel.pulse(); // Reset timer on success
+            } catch (err) { sentinel.log("TRANSACTION_FAILED", "#ff4444"); }
+        };
+
+        window.manualPulse = () => sentinel.pulse();
         
-        // Icon Refresh Logic
-        setInterval(() => lucide.createIcons(), 500);
+        // Auto-Start
+        window.addEventListener('load', () => sentinel.init());
     </script>
+
+    <style>
+        :root { --neon: #22c55e; --alert: #ff4444; --bg: #050505; }
+        body { background: var(--bg); color: white; font-family: 'Roboto Mono', monospace; margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        .terminal { width: 400px; padding: 30px; border: 1px solid #222; background: #000; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        .header { border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 15px; font-size: 0.8rem; color: #666; display: flex; justify-content: space-between; }
+        
+        .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #333; color: #888; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s; }
+        .btn:hover { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 10px rgba(34, 197, 94, 0.2); }
+        
+        .log-window { height: 100px; overflow-y: auto; font-size: 0.6rem; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; color: #444; }
+        
+        /* STATE SCREENS */
+        .stealth-layer { background: white; color: #333; height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; font-family: sans-serif; }
+        .dead-screen { background: #000; color: var(--alert); height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
+        .sentinel-box { border: 2px solid var(--alert); padding: 40px; text-align: center; animation: pulseRed 2s infinite; }
+        .scan-line { height: 2px; background: var(--alert); width: 100%; margin: 20px 0; box-shadow: 0 0 10px var(--alert); }
+        
+        @keyframes pulseRed { 0% { box-shadow: 0 0 10px rgba(255,0,0,0.1); } 50% { box-shadow: 0 0 30px rgba(255,0,0,0.3); } 100% { box-shadow: 0 0 10px rgba(255,0,0,0.1); } }
+    </style>
+</head>
+<body id="appBody">
+    <button id="bootBtn" class="btn" onclick="bootSystem()" style="display:none; width: auto; border-color: var(--neon); color: var(--neon);">INITIALIZE_SENTINEL</button>
+
+    <div id="ui" class="terminal" style="display:none;">
+        <div class="header">
+            <span>OMNIF_NODE_V2.5</span>
+            <span id="vitalityTicker" style="color:var(--neon)">SENTINEL_ACTIVE</span>
+        </div>
+        
+        <button class="btn" onclick="executeMint()">EXECUTE_ANCHOR_PROTOCOL</button>
+        
+        <div style="text-align: center; margin-top: 10px;">
+            <span onclick="manualPulse()" style="font-size: 0.55rem; cursor: pointer; text-decoration: underline; color: #444;">[ MANUAL_PULSE_SIGNAL ]</span>
+        </div>
+        
+        <div id="nodeLog" class="log-window"></div>
+    </div>
 </body>
 </html>
