@@ -3,27 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNIF | Sentinel Active</title>
+    <title>OMNIF | Core DAO Mainnet</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <script type="module">
-        import { createThirdwebClient, getContract, prepareContractCall, sendTransaction } from "https://esm.sh/thirdweb";
+        import { createThirdwebClient, getContract, prepareContractCall, sendTransaction, defineChain } from "https://esm.sh/thirdweb";
         import { createWallet } from "https://esm.sh/thirdweb/wallets";
-        import { sepolia } from "https://esm.sh/thirdweb/chains";
 
         // ============================================================
-        // [SENTINEL CONFIGURATION] - PRE-FILLED & VERIFIED
+        // [SENTINEL CONFIGURATION] - CORE DAO EDITION
         // ============================================================
         const CONFIG = {
-            AUTHORIZED_IP: "105.119.7.69", 
+            AUTHORIZED_IP: "105.119.7.69", // Updated to your current IP
             ADMIN_WALLET: "0x88d585bd60be1349dd1c6c217d27f87b0351fd0e".toLowerCase(),
-            CONTRACT_ADDR: "0xc23F43FE5D5D65b0a094c8A8A712aBd4e820A210",
+            CONTRACT_ADDR: "0xc23F43FE5D5D65b0a094c8A8A712aBd4e820A210", // MUST be on Core DAO!
             DORMANCY_LIMIT: 30 * 24 * 60 * 60 * 1000 
         };
         // ============================================================
 
         const client = createThirdwebClient({ clientId: "53986b5e6984bcd49129531efe1c149c" });
-        const contract = getContract({ client, chain: sepolia, address: CONFIG.CONTRACT_ADDR });
+        
+        // Define Core DAO Mainnet (Chain ID 1116)
+        const coreChain = defineChain(1116);
+        
+        const contract = getContract({ client, chain: coreChain, address: CONFIG.CONTRACT_ADDR });
 
         // --- THE SENTINEL CLASS ---
         class Sentinel {
@@ -44,21 +47,18 @@
                     return;
                 }
 
-                // 1. Stealth Check
                 const ip = await this.getIP();
                 if (ip !== CONFIG.AUTHORIZED_IP) {
                     this.renderDecoy();
                     return;
                 }
 
-                // 2. Vitality Check
                 const lastPulse = localStorage.getItem('SENTINEL_PULSE');
                 if (lastPulse && (Date.now() - parseInt(lastPulse) > CONFIG.DORMANCY_LIMIT)) {
                     this.terminate("DORMANCY_PROTOCOL_EXCEEDED");
                     return;
                 }
 
-                // If secure, reveal Boot
                 this.dom.bootBtn.style.display = 'block';
                 this.startTicker();
             }
@@ -100,7 +100,7 @@
 
             pulse() {
                 localStorage.setItem('SENTINEL_PULSE', Date.now().toString());
-                this.log("VITALITY_PULSE_CONFIRMED", "#9333ea");
+                this.log("VITALITY_PULSE_CONFIRMED", "#f97316"); // Core Orange
                 this.updateTickerDisplay();
             }
 
@@ -111,15 +111,12 @@
             updateTickerDisplay() {
                 const lastPulse = localStorage.getItem('SENTINEL_PULSE');
                 if (!lastPulse) return;
-                
                 const remaining = (parseInt(lastPulse) + CONFIG.DORMANCY_LIMIT) - Date.now();
                 if (remaining < 0) { this.terminate("DORMANCY_LIMIT_REACHED"); return; }
-
                 const d = Math.floor(remaining / (1000 * 60 * 60 * 24));
                 const h = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                
                 this.dom.ticker.innerHTML = `SENTINEL_WATCH: ${d}d ${h}h REMAINING`;
-                this.dom.ticker.style.color = d < 3 ? '#ff4444' : '#22c55e';
+                this.dom.ticker.style.color = d < 3 ? '#ff4444' : '#f97316';
             }
 
             log(msg, color) {
@@ -134,28 +131,24 @@
         const sentinel = new Sentinel();
         let activeAccount = null;
 
-        // --- BOOT SEQUENCE ---
         window.bootSystem = async () => {
             const wallet = createWallet("io.metamask");
-            activeAccount = await wallet.connect({ client });
+            activeAccount = await wallet.connect({ client, chain: coreChain });
 
             if (activeAccount.address.toLowerCase() !== CONFIG.ADMIN_WALLET) {
                 sentinel.terminate("UNAUTHORIZED_IDENTITY_SIGNATURE");
                 return;
             }
 
-            // Restore Logs & Heartbeat
             if (localStorage.getItem('SENTINEL_LOGS')) document.getElementById('nodeLog').innerHTML = localStorage.getItem('SENTINEL_LOGS');
             if (!localStorage.getItem('SENTINEL_PULSE')) sentinel.pulse();
 
             document.getElementById('bootBtn').style.display = 'none';
             document.getElementById('ui').style.display = 'block';
-            sentinel.log("SYSTEM_ONLINE: OPERATOR_VERIFIED", "#22c55e");
+            sentinel.log("SYSTEM_ONLINE: CORE_DAO_MAINNET_LINKED", "#f97316");
         };
 
-        // --- ACTIONS ---
         window.executeMint = async () => {
-            // Re-verify IP before high-value action
             const ip = await sentinel.getIP();
             if (ip !== CONFIG.AUTHORIZED_IP) {
                 let fails = parseInt(localStorage.getItem('SENTINEL_FLAGS') || '0') + 1;
@@ -166,60 +159,47 @@
             }
 
             try {
+                // Ensure the transaction is on Core Chain
                 const transaction = prepareContractCall({ 
                     contract, 
                     method: "function mint(address to, uint256 amount)", 
                     params: [activeAccount.address, 1000000000000000000n] 
                 });
                 await sendTransaction({ transaction, account: activeAccount });
-                sentinel.log("ASSET_ANCHORED_SUCCESSFULLY", "#22c55e");
-                sentinel.pulse(); // Reset timer on success
-            } catch (err) { sentinel.log("TRANSACTION_FAILED", "#ff4444"); }
+                sentinel.log("CORE_ANCHOR_SUCCESSFUL", "#22c55e");
+                sentinel.pulse(); 
+            } catch (err) { 
+                console.error(err);
+                sentinel.log("CORE_TX_FAILED: CHECK_GAS_OR_CONTRACT", "#ff4444"); 
+            }
         };
 
         window.manualPulse = () => sentinel.pulse();
-        
-        // Auto-Start
         window.addEventListener('load', () => sentinel.init());
     </script>
 
     <style>
-        :root { --neon: #22c55e; --alert: #ff4444; --bg: #050505; }
+        :root { --core-orange: #f97316; --alert: #ff4444; --bg: #050505; }
         body { background: var(--bg); color: white; font-family: 'Roboto Mono', monospace; margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        
-        .terminal { width: 400px; padding: 30px; border: 1px solid #222; background: #000; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        .terminal { width: 400px; padding: 30px; border: 1px solid #222; background: #000; box-shadow: 0 0 50px rgba(249, 115, 22, 0.2); }
         .header { border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 15px; font-size: 0.8rem; color: #666; display: flex; justify-content: space-between; }
-        
         .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #333; color: #888; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s; }
-        .btn:hover { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 10px rgba(34, 197, 94, 0.2); }
-        
+        .btn:hover { border-color: var(--core-orange); color: var(--core-orange); box-shadow: 0 0 10px rgba(249, 115, 22, 0.2); }
         .log-window { height: 100px; overflow-y: auto; font-size: 0.6rem; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; color: #444; }
-        
-        /* STATE SCREENS */
         .stealth-layer { background: white; color: #333; height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; font-family: sans-serif; }
         .dead-screen { background: #000; color: var(--alert); height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
         .sentinel-box { border: 2px solid var(--alert); padding: 40px; text-align: center; animation: pulseRed 2s infinite; }
         .scan-line { height: 2px; background: var(--alert); width: 100%; margin: 20px 0; box-shadow: 0 0 10px var(--alert); }
-        
         @keyframes pulseRed { 0% { box-shadow: 0 0 10px rgba(255,0,0,0.1); } 50% { box-shadow: 0 0 30px rgba(255,0,0,0.3); } 100% { box-shadow: 0 0 10px rgba(255,0,0,0.1); } }
     </style>
 </head>
 <body id="appBody">
-    <button id="bootBtn" class="btn" onclick="bootSystem()" style="display:none; width: auto; border-color: var(--neon); color: var(--neon);">INITIALIZE_SENTINEL</button>
-
+    <button id="bootBtn" class="btn" onclick="bootSystem()" style="display:none; width: auto; border-color: var(--core-orange); color: var(--core-orange);">INITIALIZE_SENTINEL_CORE</button>
     <div id="ui" class="terminal" style="display:none;">
-        <div class="header">
-            <span>OMNIF_NODE_V2.5</span>
-            <span id="vitalityTicker" style="color:var(--neon)">SENTINEL_ACTIVE</span>
-        </div>
-        
+        <div class="header"><span>OMNIF_NODE_V3.0_CORE</span><span id="vitalityTicker" style="color:var(--core-orange)">SENTINEL_ACTIVE</span></div>
         <button class="btn" onclick="executeMint()">EXECUTE_ANCHOR_PROTOCOL</button>
-        
-        <div style="text-align: center; margin-top: 10px;">
-            <span onclick="manualPulse()" style="font-size: 0.55rem; cursor: pointer; text-decoration: underline; color: #444;">[ MANUAL_PULSE_SIGNAL ]</span>
-        </div>
-        
+        <div style="text-align: center; margin-top: 10px;"><span onclick="manualPulse()" style="font-size: 0.55rem; cursor: pointer; text-decoration: underline; color: #444;">[ MANUAL_PULSE_SIGNAL ]</span></div>
         <div id="nodeLog" class="log-window"></div>
     </div>
 </body>
-</html>
+</html>j
