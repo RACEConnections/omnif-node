@@ -65,8 +65,10 @@
             async updateBalance(address) {
                 try {
                     this.dom.balance.innerHTML = `SYNCING_LEDGER...`;
-                    // Wait 1.5s for network provider to settle
-                    await new Promise(r => setTimeout(r, 1500));
+                    this.dom.balance.style.color = "#666";
+                    
+                    // Added stability delay to let wallet connect fully
+                    await new Promise(r => setTimeout(r, 2000));
                     
                     const balance = await readContract({ 
                         contract, 
@@ -74,6 +76,7 @@
                         params: [address] 
                     });
 
+                    // Format from Wei to Decimal (2 places)
                     const formatted = (Number(balance) / 1e18).toFixed(2);
                     this.dom.balance.innerHTML = `ASSET_BAL: ${formatted} OMNIF`;
                     this.dom.balance.style.color = "#f97316";
@@ -82,7 +85,7 @@
                     console.error("Sync Error:", err);
                     this.dom.balance.innerHTML = `ASSET_BAL: RE-SYNCING...`;
                     this.dom.balance.style.color = "#ff4444";
-                    // Retry logic: try again in 5 seconds
+                    // Recursive retry every 5 seconds
                     setTimeout(() => this.updateBalance(address), 5000);
                 }
             }
@@ -115,7 +118,7 @@
                 activeAccount = await wallet.connect({ client, chain: coreChain });
 
                 if (activeAccount.address.toLowerCase() !== CONFIG.ADMIN_WALLET) {
-                    alert("UNAUTHORIZED_WALLET_DETECTED");
+                    alert("UNAUTHORIZED_WALLET");
                     return;
                 }
 
@@ -126,12 +129,11 @@
                 // Trigger the initial sync
                 sentinel.updateBalance(activeAccount.address);
                 
-                // Initialize Pulse if new session
                 if (!localStorage.getItem('SENTINEL_PULSE')) {
                     localStorage.setItem('SENTINEL_PULSE', Date.now().toString());
                 }
             } catch (err) {
-                sentinel.log("BOOT_ERROR: CHECK_METAMASK", "#ff4444");
+                sentinel.log("BOOT_ERROR: RETRYING...", "#ff4444");
             }
         };
 
@@ -147,10 +149,10 @@
                 sentinel.log("ANCHOR_SUCCESSFUL", "#22c55e");
                 localStorage.setItem('SENTINEL_PULSE', Date.now().toString());
                 
-                // Delay balance update to allow block confirmation
-                setTimeout(() => sentinel.updateBalance(activeAccount.address), 4000);
+                // Longer delay after mint to ensure block confirmation
+                setTimeout(() => sentinel.updateBalance(activeAccount.address), 5000);
             } catch (err) { 
-                sentinel.log("TX_FAILED: INSUFFICIENT_GAS_OR_REVERT", "#ff4444"); 
+                sentinel.log("TX_FAILED: CHECK_GAS", "#ff4444"); 
             }
         };
 
@@ -162,7 +164,7 @@
         body { background: var(--bg); color: white; font-family: 'Roboto Mono', monospace; margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .terminal { width: 420px; padding: 30px; border: 1px solid #222; background: #000; box-shadow: 0 0 40px rgba(249, 115, 22, 0.1); }
         .header { border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 15px; font-size: 0.75rem; color: #666; display: flex; justify-content: space-between; flex-direction: column; gap: 8px; }
-        .watchlist { color: var(--core-orange); font-weight: bold; font-size: 0.85rem; border: 1px solid #222; padding: 8px; background: #080808; text-align: center; }
+        .watchlist { color: var(--core-orange); font-weight: bold; font-size: 0.85rem; border: 1px solid #222; padding: 10px; background: #080808; text-align: center; }
         .btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #333; color: #888; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         .btn:hover { border-color: var(--core-orange); color: var(--core-orange); box-shadow: 0 0 15px rgba(249, 115, 22, 0.2); }
         .log-window { height: 120px; overflow-y: auto; font-size: 0.65rem; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; color: #555; }
