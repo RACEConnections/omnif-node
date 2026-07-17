@@ -24,7 +24,6 @@
             color: var(--charcoal);
         }
 
-        /* Blinking Vacancy Badge Animation */
         @keyframes blinker {
             0% { opacity: 1; }
             50% { opacity: 0.2; }
@@ -72,9 +71,7 @@
         }
 
         .badge-anchor { background-color: #ffe8d6; color: #a0522d; }
-        .badge-industrial { background-color: #e2f0cb; color: #4b6b1d; }
 
-        /* Printable Menu Area styling */
         .printable-menu-frame {
             background-color: var(--emerald-dark);
             color: #ffffff;
@@ -146,8 +143,9 @@
                             <small class="font-monospace text-muted">Node: OSG03-JPM_P09</small>
                         </div>
                         <h4 class="fw-bold mb-1">Jolly Premium Meal (JPM)</h4>
+                        <small class="text-muted d-block mb-2"><i class="bi bi-clock-fill text-warning"></i> 8:00 AM — 8:00 PM (Mon - Sat)</small>
                         <small class="text-muted d-block mb-3"><i class="bi bi-geo-alt-fill"></i> Library Compound, Oke-Fia GRA Sector</small>
-                        <p class="small text-secondary mb-3">Clean self-service dining, corporate takeaway, and high-status deliveries targeted directly at adjacent court and government facilities.</p>
+                        <p class="small text-secondary mb-3">Clean self-service dining, corporate takeaway, and high-status deliveries targeted directly at adjacent court and government facilities. <strong>24-Hour catering available upon special request parameters.</strong></p>
                         <div class="d-grid mt-auto">
                             <a href="tel:08106326967" class="btn btn-outline-dark font-monospace fw-bold"><i class="bi bi-telephone-fill text-success"></i> 08106326967</a>
                         </div>
@@ -173,29 +171,80 @@
                 </div>
             </div>
 
-            <div class="row g-4 justify-content-center mb-5 no-print" id="jpm-menu-anchor">
+            <div class="row g-4 justify-content-center mb-5" id="jpm-menu-anchor">
                 <div class="col-lg-10">
                     <div class="printable-menu-frame shadow-lg">
                         <div class="text-center mb-4">
                             <span class="text-warning font-monospace small d-block mb-1">[ HARDWARE RENTAL LEDGER: P09 ]</span>
                             <h2 class="fw-bold text-uppercase tracking-wide" style="color: var(--gold);">JOLLY PREMIUM MEAL</h2>
-                            <p class="fst-italic text-white-50 mb-2">Clean Self-Service • Takeout Logistics • Elite Area Delivery</p>
+                            <p class="fst-italic text-white-50 mb-1">Clean Self-Service • Takeout Logistics • Elite Area Delivery</p>
+                            <span class="badge bg-dark border border-secondary text-warning font-monospace px-3 py-1 mb-2">AVAILABILITY: 8AM - 8PM | 24HRS ON SPECIAL DEMAND</span>
                             <hr class="border-warning my-3 opacity-25">
                         </div>
 
                         <div class="mb-4">
-                            <h6 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3">Sovereign Entrées</h6>
-                            <div class="d-flex justify-content-between align-items-baseline mb-2">
-                                <span class="fw-bold">Premium Rice Medley <small class="text-white-50 d-block fw-normal">Richly seasoned baseline Jollof / Fried variant</small></span>
-                                <span class="menu-dots"></span><span class="fw-bold text-warning">Standard Base</span>
+                            <h5 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3"><i class="bi bi-egg-fried"></i> Standard Baseline Entrées (Mon - Sat)</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">White Rice Medley <small class="text-white-50 d-block fw-normal">Perfected premium grain base</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Available</span>
                             </div>
-                            <div class="d-flex justify-content-between align-items-baseline mb-2">
-                                <span class="fw-bold">Traditional Swallow Selection <small class="text-white-50 d-block fw-normal">Pounded Yam / Amala paired with clean local soups</small></span>
-                                <span class="menu-dots"></span><span class="fw-bold text-warning">Premium Feast</span>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Ofada Heritage Rice <small class="text-white-50 d-block fw-normal">Traditional local unpolished selection</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Available</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Native Bean Composition <small class="text-white-50 d-block fw-normal">Slow-simmered local honey beans</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Available</span>
                             </div>
                         </div>
 
-                        <div class="text-center mt-3">
+                        <div class="mb-4">
+                            <h5 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3"><i class="bi bi-fire"></i> Signature Stews & Standard Accoutrements</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Dark Fried Pepper Sauce <small class="text-white-50 d-block fw-normal">Richly fried, deeply seasoned native spicy reduction</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Signature</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Red Pepper Stew <small class="text-white-50 d-block fw-normal">Smooth, savory classic bell pepper soup base</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Classic</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Soft Juicy Beef Cutlets <small class="text-white-50 d-block fw-normal">Tender, thoroughly marinated premium beef units</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Premium</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Boiled Farm Eggs <small class="text-white-50 d-block fw-normal">Freshly prepared local boiled egg pairing</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Standard</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3"><i class="bi bi-star-fill"></i> Premium Custom Order Portfolio (On-Demand Only)</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Sovereign Poultry Option <small class="text-white-50 d-block fw-normal">Freshly prepared chicken cuts tendered to your dish selection</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Demand Lock</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Fresh Catch Selections <small class="text-white-50 d-block fw-normal">Freshly available fish units tailored to precise culinary choice</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Market Choice</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3">Institutional Call Routines</h6>
+                            <p class="small text-white-50 mb-0">Serving the Oke-Fia Court Sector, GRA Offices, and Library Complex. Call or SMS <strong>08106326967</strong> ahead of your timeline to clear waiting periods entirely. For advanced 24-hour demand structures or massive corporate event orders, notify the line 48 hours in advance to secure execution parameters.</p>
+                        </div>
+
+                        <div class="text-center mt-4 no-print">
                             <button onclick="window.print();" class="btn btn-warning fw-bold text-dark px-4"><i class="bi bi-printer-fill me-2"></i> Print Physical Menu Sheet</button>
                         </div>
                     </div>
@@ -278,4 +327,4 @@
     </footer>
 
 </body>
-    </html>
+</html>
