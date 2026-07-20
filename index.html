@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SACIPHUB Global | International Restaurant & Chef Directory</title>
+    <title>SACIPHUB Marketplace | Deployed Physical Nodes & Logistics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
             --emerald-dark: #061f15;
             --emerald-medium: #0b4c35;
+            --emerald-bright: #128155;
             --clay: #d96b27;
             --gold: #f1c40f;
             --charcoal: #111413;
             --light-cream: #f4f7f5;
-            --royal-red: #440a08;
+            --violet-brand: #4a154b;
         }
 
         body {
@@ -69,8 +70,24 @@
             border-radius: 20px;
         }
 
-        .badge-london { background-color: #e2f0cb; color: #4b6b1d; }
-        .badge-vacancy { background-color: #ffe8d6; color: #a0522d; }
+        .badge-anchor { background-color: #ffe8d6; color: #a0522d; }
+
+        .printable-menu-frame {
+            background-color: var(--emerald-dark);
+            color: #ffffff;
+            border: 4px double var(--gold);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .menu-dots {
+            flex-grow: 1;
+            border-bottom: 2px dotted rgba(255, 255, 255, 0.2);
+            margin: 0 10px;
+            position: relative;
+            top: -4px;
+        }
 
         .social-btn {
             width: 45px;
@@ -90,46 +107,47 @@
         .social-btn:hover {
             background-color: var(--clay);
             color: white;
+            transform: scale(1.1);
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .printable-menu-frame, .printable-menu-frame * { visibility: visible; }
+            .printable-menu-frame { position: absolute; left: 0; top: 0; width: 100%; border: none; background: black !important; color: white !important; }
+            .no-print { display: none !important; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3 no-print">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-globe-europe-africa text-warning"></i> OURMARKETPLACE.PROTOCOLX.ONE</a>
+            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-camera-reels-fill text-warning"></i> MARKET.PROTOCOLX.ONE</a>
             <div class="ms-auto">
-                <span class="badge bg-dark border border-secondary text-white-50 p-2 font-monospace">HUB: UK_GLOBAL_NODE</span>
+                <span class="badge bg-dark border border-secondary text-white-50 p-2 font-monospace">NETWORK: LIVE_OUTFLOW</span>
             </div>
         </div>
     </nav>
 
-    <div class="bg-dark text-white py-5 text-center" style="background: linear-gradient(135deg, var(--emerald-dark) 0%, var(--charcoal) 100%); border-bottom: 5px solid var(--gold);">
-        <div class="container">
-            <span class="badge bg-warning text-dark mb-2 px-3 py-2 fw-bold">INTERNATIONAL GATEWAY LAYER</span>
-            <h1 class="display-4 fw-bold">Global Culinary & Restaurant Matrix</h1>
-            <p class="lead">Anchoring premium UK establishments and international culinary masters under secure, sovereign verification indices.</p>
-        </div>
-    </div>
-
     <div class="container my-5">
         
-        <section id="global-nodes">
-            <h2 class="section-header">Branch 01: Active UK Anchors & Chef Entry Registries</h2>
-            <p class="text-muted">Monitoring operational hours, menu structures, and physical-to-digital inventory parameters across international jurisdictions.</p>
+        <section id="chef-nodes">
+            <h2 class="section-header">Branch 01: Commercial Cooking Services & Culinary Registries</h2>
+            <p class="text-muted no-print">Monitoring active local kitchen grids, premium corporate caters, and verified stands executing secure checkout tokens.</p>
             
             <div class="row g-4 mb-5">
                 <div class="col-lg-4 col-md-6">
-                    <div class="card card-custom p-4 border-start border-4 border-success h-100">
+                    <div class="card card-custom p-4 border-start border-4 border-warning h-100">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="sector-badge badge-london">London Anchor</span>
-                            <small class="font-monospace text-muted">Node: UK-LDN-P01</small>
+                            <span class="sector-badge badge-anchor">Premium Anchor</span>
+                            <small class="font-monospace text-muted">Node: OSG03-JPM_P09</small>
                         </div>
-                        <h4 class="fw-bold mb-1">London Flagship Restaurant</h4>
-                        <small class="text-muted d-block mb-3"><i class="bi bi-geo-alt-fill"></i> Central London Sector, UK</small>
-                        <p class="small text-secondary mb-3">Premium full-service dining, high-end takeout logistics, and elite inner-city delivery. Fully integrated with our background data verification structures.</p>
+                        <h4 class="fw-bold mb-1">Jolly Premium Meal (JPM)</h4>
+                        <small class="text-muted d-block mb-2"><i class="bi bi-clock-fill text-warning"></i> 8:00 AM — 8:00 PM (Mon - Sat)</small>
+                        <small class="text-muted d-block mb-3"><i class="bi bi-geo-alt-fill"></i> Library Compound, Oke-Fia GRA Sector</small>
+                        <p class="small text-secondary mb-3">Clean self-service dining, corporate takeaway, and high-status deliveries targeted directly at adjacent court and government facilities. <strong>24-Hour catering available upon special request parameters.</strong></p>
                         <div class="d-grid mt-auto">
-                            <span class="btn btn-dark btn-sm font-monospace text-warning disabled"><i class="bi bi-shield-check"></i> Node Active & Secure</span>
+                            <a href="tel:08106326967" class="btn btn-outline-dark font-monospace fw-bold"><i class="bi bi-telephone-fill text-success"></i> 08106326967</a>
                         </div>
                     </div>
                 </div>
@@ -137,47 +155,163 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="card card-custom p-4 border-dashed border-2 text-center h-100 d-flex flex-column justify-content-center">
                         <div class="mb-2"><span class="sector-badge vacancy-blink">VACANCY INGESTION</span></div>
-                        <h5 class="fw-bold text-muted text-uppercase mb-1">Open Foreign Anchor</h5>
-                        <small class="text-muted d-block mb-3">UK Corridor / Regional Capital Pipeline</small>
-                        <p class="small text-secondary-50 px-2">Awaiting interface mapping from verified international restaurant operators or master chefs.</p>
+                        <h5 class="fw-bold text-muted text-uppercase mb-1">Open Culinary Slot</h5>
+                        <small class="text-muted d-block mb-3">Ogo-Oluwa / Court Corridor Pipeline</small>
+                        <p class="small text-secondary-50 px-2">Awaiting interface submission from verified local food operators or standalone active chefs.</p>
                     </div>
                 </div>
 
                 <div class="col-lg-4 col-md-6">
                     <div class="card card-custom p-4 border-dashed border-2 text-center h-100 d-flex flex-column justify-content-center">
                         <div class="mb-2"><span class="sector-badge vacancy-blink">VACANCY INGESTION</span></div>
-                        <h5 class="fw-bold text-muted text-uppercase mb-1">Open Chef Entry</h5>
-                        <small class="text-muted d-block mb-3">International Culinary Network</small>
-                        <p class="small text-secondary-50 px-2">Awaiting verification tokens for high-status global hospitality installations.</p>
+                        <h5 class="fw-bold text-muted text-uppercase mb-1">Open Service Node</h5>
+                        <small class="text-muted d-block mb-3">Ayegbaju Sector / Commercial Grid</small>
+                        <p class="small text-secondary-50 px-2">Awaiting local canteen registration to map physical daily ledger accounting.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 justify-content-center mb-5" id="jpm-menu-anchor">
+                <div class="col-lg-10">
+                    <div class="printable-menu-frame shadow-lg">
+                        <div class="text-center mb-4">
+                            <span class="text-warning font-monospace small d-block mb-1">[ HARDWARE RENTAL LEDGER: P09 ]</span>
+                            <h2 class="fw-bold text-uppercase tracking-wide" style="color: var(--gold);">JOLLY PREMIUM MEAL</h2>
+                            <p class="fst-italic text-white-50 mb-1">Clean Self-Service • Takeout Logistics • Elite Area Delivery</p>
+                            <span class="badge bg-dark border border-secondary text-warning font-monospace px-3 py-1 mb-2">AVAILABILITY: 8AM - 8PM | 24HRS ON SPECIAL DEMAND</span>
+                            <hr class="border-warning my-3 opacity-25">
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3"><i class="bi bi-egg-fried"></i> Standard Baseline Entrées (Mon - Sat)</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">White Rice Medley <small class="text-white-50 d-block fw-normal">Perfected premium grain base</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Available</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Ofada Heritage Rice <small class="text-white-50 d-block fw-normal">Traditional local unpolished selection</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Available</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Native Bean Composition <small class="text-white-50 d-block fw-normal">Slow-simmered local honey beans</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Available</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3"><i class="bi bi-fire"></i> Signature Stews & Standard Accoutrements</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Dark Fried Pepper Sauce <small class="text-white-50 d-block fw-normal">Richly fried, deeply seasoned native spicy reduction</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Signature</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Red Pepper Stew <small class="text-white-50 d-block fw-normal">Smooth, savory classic bell pepper soup base</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Classic</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Soft Juicy Beef Cutlets <small class="text-white-50 d-block fw-normal">Tender, thoroughly marinated premium beef units</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Premium</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Boiled Farm Eggs <small class="text-white-50 d-block fw-normal">Freshly prepared local boiled egg pairing</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Standard</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3"><i class="bi bi-star-fill"></i> Premium Custom Order Portfolio (On-Demand Only)</h5>
+                            
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Sovereign Poultry Option <small class="text-white-50 d-block fw-normal">Freshly prepared chicken cuts tendered to your dish selection</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Demand Lock</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-baseline mb-3">
+                                <span class="fw-bold">Fresh Catch Selections <small class="text-white-50 d-block fw-normal">Freshly available fish units tailored to precise culinary choice</small></span>
+                                <span class="menu-dots"></span><span class="fw-bold text-warning">Market Choice</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-warning text-uppercase fw-bold border-bottom border-secondary pb-2 mb-3">Institutional Call Routines</h6>
+                            <p class="small text-white-50 mb-0">Serving the Oke-Fia Court Sector, GRA Offices, and Library Complex. Call or SMS <strong>08106326967</strong> ahead of your timeline to clear waiting periods entirely. For advanced 24-hour demand structures or massive corporate event orders, notify the line 48 hours in advance to secure execution parameters.</p>
+                        </div>
+
+                        <div class="text-center mt-4 no-print">
+                            <button onclick="window.print();" class="btn btn-warning fw-bold text-dark px-4"><i class="bi bi-printer-fill me-2"></i> Print Physical Menu Sheet</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="global-mandate" class="mb-5">
-            <h2 class="section-header">The Global Dual-Presence Protocol</h2>
+        <section id="industrial-nodes" class="no-print">
+            <h2 class="section-header">Branch 02: Industrial Production, Farms & Wholesale Channels</h2>
+            <p class="text-muted">Mapping bulk primary food logistics, commodity mills, and wholesale waybill distributions along the regional supply chains.</p>
+            
             <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card card-custom p-4 bg-white">
-                        <h4 class="fw-bold text-dark"><i class="bi bi-geo-fill text-danger"></i> Physical Presence Reality</h4>
-                        <p class="text-secondary">Economic value is generated by real bricks-and-mortar spaces—the pristine kitchens, staff workflows, and high-volume guest tables in London. These operations form the solid baseline of our physical network layer.</p>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card card-custom p-4 border-dashed border-2 text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="mb-2"><span class="sector-badge vacancy-blink">FARM VACANCY</span></div>
+                        <i class="bi bi-tree fs-2 text-success mb-2"></i>
+                        <h5 class="fw-bold text-dark text-uppercase mb-1">Agricultural Gate</h5>
+                        <small class="text-muted d-block mb-2">Regional Influx Point</small>
+                        <p class="small text-muted font-monospace mb-0" style="font-size:0.8rem;">Status: Awaiting Sync</p>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card card-custom p-4 bg-white">
-                        <h4 class="fw-bold text-dark"><i class="bi bi-cpu-fill text-info"></i> Digital Mapping Vault</h4>
-                        <p class="text-secondary">By reflecting physical excellence onto the unhackable domain route <code>ourmarketplace.protocolx.one</code>, foreign operators project incredible professional status to institutional clients, completely insulated from predatory aggregation networks.</p>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="card card-custom p-4 border-dashed border-2 text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="mb-2"><span class="sector-badge vacancy-blink">MANUFACTURING VACANCY</span></div>
+                        <i class="bi bi-building-gear fs-2 text-warning mb-2"></i>
+                        <h5 class="fw-bold text-dark text-uppercase mb-1">Processing Plant</h5>
+                        <small class="text-muted d-block mb-2">Commodity Conversion Core</small>
+                        <p class="small text-muted font-monospace mb-0" style="font-size:0.8rem;">Status: Awaiting Sync</p>
                     </div>
                 </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="card card-custom p-4 border-dashed border-2 text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="mb-2"><span class="sector-badge vacancy-blink">PRODUCTION VACANCY</span></div>
+                        <i class="bi bi-boxes fs-2 text-primary mb-2"></i>
+                        <h5 class="fw-bold text-dark text-uppercase mb-1">Production Facility</h5>
+                        <small class="text-muted d-block mb-2">Packaging & Sorting Hub</small>
+                        <p class="small text-muted font-monospace mb-0" style="font-size:0.8rem;">Status: Awaiting Sync</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="card card-custom p-4 border-dashed border-2 text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="mb-2"><span class="sector-badge vacancy-blink">WHOLESALE VACANCY</span></div>
+                        <i class="bi bi-truck-front fs-2 text-danger mb-2"></i>
+                        <h5 class="fw-bold text-dark text-uppercase mb-1">Wholesale Merchant</h5>
+                        <small class="text-muted d-block mb-2">Bulk Distribution Outflow</small>
+                        <p class="small text-muted font-monospace mb-0" style="font-size:0.8rem;">Status: Awaiting Sync</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="festive-ceremonies" class="mt-5 no-print">
+            <div class="card card-custom p-4 bg-dark text-white border-start border-5 border-warning">
+                <h4 class="fw-bold text-warning"><i class="bi bi-music-note-beamed"></i> SACIPHUB Festive Ceremonies & Annual Concerts</h4>
+                <p class="text-white-50 mb-0">Bridging technology integration with public cultural celebration. Honoring our frontline operators and behind-the-scenes service providers through high-energy musical events, traditional assemblies, and annual harvest acknowledgments.</p>
             </div>
         </section>
 
     </div>
 
-    <footer class="bg-dark text-white py-5 mt-5 text-center border-top border-warning">
+    <footer class="bg-dark text-white py-5 mt-5 text-center no-print border-top border-warning">
         <div class="container">
             <p class="fw-bold mb-1">RHYTHM ARTS AND CULTURE ENTERTAINMENT LIMITED (R.A.C.E. LLC)</p>
-            <p class="small text-muted mb-4">SACIPHUB International Network &copy; 2026. Configured strictly under core data-hardening standards.</p>
+            <p class="small text-muted mb-4">SACIPHUB Project Network &copy; 2026. Controlled under Protocol 01 Data-Hardening Standards.</p>
             
             <div class="d-flex flex-column align-items-center mb-4 text-warning" style="font-size: 0.95rem;">
                 <span class="font-monospace fw-bold"><i class="bi bi-telephone-outbound-fill"></i> 08127833493 [System Controller Channel]</span>
@@ -188,9 +322,9 @@
                 <a class="social-btn" href="https://x.com" target="_blank"><i class="bi bi-twitter-x"></i></a>
                 <a class="social-btn" href="https://instagram.com" target="_blank"><i class="bi bi-instagram"></i></a>
             </div>
-            <p class="small text-muted mb-0">Running securely on the global gateway branch of <strong>protocolx.one</strong></p>
+            <p class="small text-muted mb-0">Running securely on the marketplace branch of <strong>protocolx.one</strong></p>
         </div>
     </footer>
 
 </body>
-        </html>
+    </html>
